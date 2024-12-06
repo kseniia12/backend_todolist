@@ -38,8 +38,8 @@ export const getUsersByIdServices = async (id) => {
 };
 
 export const editUsersByIdServices = async (id, userData) => {
-  const u = await userRepository.findOneBy({ id });
-  return userRepository.save({ ...u, ...userData });
+  const user = await userRepository.findOneBy({ id });
+  return userRepository.save({ ...user, ...userData });
 };
 
 export const deleteUserByIdServices = async (id) => {
