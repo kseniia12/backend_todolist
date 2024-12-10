@@ -26,8 +26,8 @@ export const getAllTodos = async (
 ): Promise<void> => {
   try {
     const user = req.user.id;
-    const todos = await getAllTodosServices(user);
-    res.json(todos);
+    const todo = await getAllTodosServices(user);
+    res.json({ todo });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -40,7 +40,7 @@ export const editTodoById = async (
   try {
     const userID = req.user.id;
     const todo = await editTodoByIdServices(userID, req.params.id, req.body);
-    res.json(todo);
+    res.json({ todo });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -52,8 +52,11 @@ export const deleteTodoById = async (
 ): Promise<void> => {
   try {
     const userID = req.user.id;
+    console.log(userID);
+    console.log(req.params.id);
     await deleteTodoByIdServices(userID, req.params.id);
-    res.status(204).send("Удален");
+    const todo = await getAllTodosServices(userID);
+    res.json({ todo });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

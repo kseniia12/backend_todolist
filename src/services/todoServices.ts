@@ -12,7 +12,7 @@ export const createTodoServices = async (id, todo) => {
     text: todo.text,
     user: user,
   });
-  return todoRepository.save(newTodo);
+  return await todoRepository.save(newTodo);
 };
 
 export const getAllTodosServices = async (id) => {
