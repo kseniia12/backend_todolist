@@ -8,7 +8,5 @@ export const hashPassword = (password: string): string => {
 
 export const verifyPassword = (password: string, hash: string): boolean => {
   const newPassword = hashPassword(password);
-  console.log("newPassword", newPassword);
-  console.log("hash", hash);
   return newPassword === hash;
 };

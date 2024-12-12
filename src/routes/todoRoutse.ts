@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createTodo,
+  deleteAllCompleted,
   deleteAllTodos,
   deleteTodoById,
   editTodoById,
@@ -14,6 +15,7 @@ todoRoutse.get("", authenticateToken, getAllTodos); // 2 +
 todoRoutse.patch("/:id", authenticateToken, editTodoById); // 3 +
 todoRoutse.delete("", authenticateToken, deleteAllTodos); // 4
 todoRoutse.delete("/:id", authenticateToken, deleteTodoById); //5 +
+todoRoutse.patch("", authenticateToken, deleteAllCompleted);
 // 1 - создать туду post
 // 2 - Получить все туду get
 // 3 - отредактировать туду по id puch

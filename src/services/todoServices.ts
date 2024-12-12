@@ -15,12 +15,23 @@ export const createTodoServices = async (id, todo) => {
   return await todoRepository.save(newTodo);
 };
 
-export const getAllTodosServices = async (id) => {
+export const getAllTodosServices = async (id, filter) => {
   const user = await userRepository.findOneBy({ id });
+  const todos = await todoRepository.find({ where: { user: { id: id } } });
   if (!user) {
     throw new Error("User not found");
   }
-  return await todoRepository.find({ where: { user: { id: id } } });
+  switch (filter) {
+    case "active":
+      return todos.filter((todo) => todo.completed === false);
+
+    case "completed":
+      return todos.filter((todo) => todo.completed === true);
+
+    case "all":
+    default:
+      return todos;
+  }
 };
 
 export const editTodoByIdServices = async (userId, todoId, userData) => {
@@ -55,4 +66,13 @@ export const deleteAllTodoServices = async (userId) => {
   const todos = await todoRepository.find({ where: { user: { id: userId } } });
   const trueTodos = todos.filter((todo) => todo.completed === true);
   todoRepository.remove(trueTodos);
+};
+
+export const deleteAllTodosCompletedServices = async (todos) => {
+  const allCompleted = todos.every((todo) => todo.completed);
+  const allTasksNotCompleted = todos.map((todo) => ({
+    ...todo,
+    completed: !allCompleted,
+  }));
+  return await todoRepository.save(allTasksNotCompleted);
 };
