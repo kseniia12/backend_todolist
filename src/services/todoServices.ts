@@ -16,6 +16,7 @@ export const createTodoServices = async (id, todo) => {
 };
 
 export const getAllTodosServices = async (id, filter) => {
+  console.log("filter", filter)
   const user = await userRepository.findOneBy({ id });
   const todos = await todoRepository.find({ where: { user: { id: id } } });
   if (!user) {
@@ -24,10 +25,8 @@ export const getAllTodosServices = async (id, filter) => {
   switch (filter) {
     case "active":
       return todos.filter((todo) => todo.completed === false);
-
     case "completed":
       return todos.filter((todo) => todo.completed === true);
-
     case "all":
     default:
       return todos;
@@ -36,6 +35,7 @@ export const getAllTodosServices = async (id, filter) => {
 
 export const editTodoByIdServices = async (userId, todoId, userData) => {
   const user = await userRepository.findOneBy({ id: userId });
+  console.log("userData", userData);
   if (!user) {
     throw new Error("User not found");
   }
@@ -44,8 +44,14 @@ export const editTodoByIdServices = async (userId, todoId, userData) => {
   if (!todo) {
     throw new Error("Todo not found");
   }
-  const updatedTodo = await todoRepository.save({ ...todo, ...userData });
-  return updatedTodo;
+  if (userData.valueInputField) {
+    todo.text = userData.valueInputField;
+  }
+  if (userData.completed) {
+    todo.completed = userData.completed;
+  }
+  await todoRepository.save(todo);
+  return todo;
 };
 
 export const deleteTodoByIdServices = async (userId, todoId) => {
