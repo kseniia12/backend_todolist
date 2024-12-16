@@ -1,48 +1,39 @@
-import { userRepository } from "../repository/userRepository";
-import { todoRepository } from "../repository/todoRepository";
-import * as dotenv from "dotenv";
+import * as dotenv from 'dotenv';
+import { todoRepository } from '../repository/todoRepository';
+import { TodoEntity } from 'src/db/entities/todo.entity';
+import { responseObjectTodo } from '../lib/componets';
+import { userRepository } from '../repository/userRepository';
 
 dotenv.config();
-export const createTodoServices = async (id, todo) => {
-  const user = await userRepository.findOneBy({ id });
-  if (!user) {
-    throw new Error("User not found");
-  }
+
+export const createTodoServices = async (userId: number, todo: responseObjectTodo) => {
+  const user = await userRepository.findOne({ where: { id: userId } });
   const newTodo = todoRepository.create({
     text: todo.text,
-    user: user,
+    user,
   });
-  return await todoRepository.save(newTodo);
+  return todoRepository.save(newTodo);
 };
 
-export const getAllTodosServices = async (id, filter) => {
-  console.log("filter", filter)
-  const user = await userRepository.findOneBy({ id });
-  const todos = await todoRepository.find({ where: { user: { id: id } } });
-  if (!user) {
-    throw new Error("User not found");
-  }
+export const getAllTodosServices = async (id: number, filter: string) => {
+  const todos = await todoRepository.find({ where: { user: { id } } });
   switch (filter) {
-    case "active":
+    case 'active':
       return todos.filter((todo) => todo.completed === false);
-    case "completed":
+    case 'completed':
       return todos.filter((todo) => todo.completed === true);
-    case "all":
+    case 'all':
     default:
       return todos;
   }
 };
 
-export const editTodoByIdServices = async (userId, todoId, userData) => {
-  const user = await userRepository.findOneBy({ id: userId });
-  console.log("userData", userData);
-  if (!user) {
-    throw new Error("User not found");
-  }
+export const editTodoByIdServices = async (userId: number, todoId: number, userData: responseObjectTodo) => {
   const todos = await todoRepository.find({ where: { user: { id: userId } } });
-  const todo = todos.find((item) => item.id == todoId);
+  const todo = todos.find((item) => item.id === todoId);
+  console.log(todo)
   if (!todo) {
-    throw new Error("Todo not found");
+    throw new Error('Todo not found');
   }
   if (userData.valueInputField) {
     todo.text = userData.valueInputField;
@@ -54,31 +45,23 @@ export const editTodoByIdServices = async (userId, todoId, userData) => {
   return todo;
 };
 
-export const deleteTodoByIdServices = async (userId, todoId) => {
-  const user = await userRepository.findOneBy({ id: userId });
-  if (!user) {
-    throw new Error("User not found");
-  }
+export const deleteTodoByIdServices = async (userId: number, todoId: number) => {
   const todos = await todoRepository.find({ where: { user: { id: userId } } });
-  const todo = todos.find((item) => item.id == todoId);
+  const todo = todos.find((item) => item.id === todoId);
   await todoRepository.delete(todo.id);
 };
 
-export const deleteAllTodoServices = async (userId) => {
-  const user = await userRepository.findOneBy({ id: userId });
-  if (!user) {
-    throw new Error("User not found");
-  }
+export const deleteAllTodoServices = async (userId: number) => {
   const todos = await todoRepository.find({ where: { user: { id: userId } } });
   const trueTodos = todos.filter((todo) => todo.completed === true);
   todoRepository.remove(trueTodos);
 };
 
-export const deleteAllTodosCompletedServices = async (todos) => {
+export const deleteAllTodosCompletedServices = async (todos: responseObjectTodo[]) => {
   const allCompleted = todos.every((todo) => todo.completed);
   const allTasksNotCompleted = todos.map((todo) => ({
     ...todo,
     completed: !allCompleted,
   }));
-  return await todoRepository.save(allTasksNotCompleted);
+  return todoRepository.save(allTasksNotCompleted);
 };

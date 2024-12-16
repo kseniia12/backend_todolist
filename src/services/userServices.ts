@@ -1,10 +1,11 @@
-import { verifyPassword } from "../utils/hashing";
-import { userRepository } from "../repository/userRepository";
 import * as dotenv from "dotenv";
-import { hashPassword } from "../utils/hashing";
+import { verifyPassword, hashPassword } from "../utils/hashing";
+import { userRepository } from "../repository/userRepository";
+import { userObject } from "../lib/componets";
+
 dotenv.config();
 
-export const createUsersServices = async (userData) => {
+export const createUsersServices = async (userData: userObject) => {
   const hashedPassword = hashPassword(userData.password);
   const newUser = userRepository.create({
     fullName: userData.fullName,
@@ -30,18 +31,21 @@ export const loginUsersServices = async (email: string, password: string) => {
 };
 
 export const getAllUsersServices = async () => {
-  return await userRepository.find();
+  return userRepository.find();
 };
 
-export const getUsersByIdServices = async (id) => {
-  return await userRepository.findOneBy({ id });
+export const getUsersByIdServices = async (id: number) => {
+  return userRepository.findOneBy({ id });
 };
 
-export const editUsersByIdServices = async (id, userData) => {
+export const editUsersByIdServices = async (
+  id: number,
+  userData: userObject,
+) => {
   const user = await userRepository.findOneBy({ id });
   return userRepository.save({ ...user, ...userData });
 };
 
-export const deleteUserByIdServices = async (id) => {
+export const deleteUserByIdServices = async (id: number) => {
   await userRepository.delete(id);
 };

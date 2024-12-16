@@ -7,7 +7,7 @@ export const generateAccessToken = async (user: Partial<UserEntity>) => {
     jwt.sign(
       { ...user },
       config.token.secret,
-      { expiresIn: "180s" },
+      { expiresIn: "180000000" },
       (err, token) => {
         if (err) {
           return rej(err);

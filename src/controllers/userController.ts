@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { formDataUser } from "../utils/checkDataUser";
 import { generateAccessToken } from "../utils/utilsToken";
 import {

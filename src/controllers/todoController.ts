@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import {
   createTodoServices,
   deleteAllTodosCompletedServices,
@@ -13,22 +13,19 @@ export const createTodo = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const user = req.user.id;
-    const todo = await createTodoServices(user, req.body);
+    const todo = await createTodoServices(Number(req.user.id), req.body);
     res.status(201).json(todo);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-export const getAllTodos = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const getAllTodos = async (req: Request, res: Response) => {
   try {
-    const filter = req.query.filter;
-    const user = req.user.id;
-    const todo = await getAllTodosServices(user, filter);
+    const todo = await getAllTodosServices(
+      req.user.id,
+      req.query.filter as string,
+    );
     res.json(todo);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -40,8 +37,11 @@ export const editTodoById = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const userID = req.user.id;
-    const todo = await editTodoByIdServices(userID, req.params.id, req.body);
+    const todo = await editTodoByIdServices(
+      req.user.id,
+      Number(req.params.id),
+      req.body,
+    );
     res.json(todo);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -53,9 +53,8 @@ export const deleteTodoById = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const userID = req.user.id;
-    await deleteTodoByIdServices(userID, req.params.id);
-    const todo = await getAllTodosServices(userID, "all");
+    await deleteTodoByIdServices(req.user.id, Number(req.params.id));
+    const todo = await getAllTodosServices(req.user.id, "all");
     res.json(todo);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -67,9 +66,8 @@ export const deleteAllTodos = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const user = req.user.id;
-    await deleteAllTodoServices(user);
-    const todo = await getAllTodosServices(user, "all");
+    await deleteAllTodoServices(req.user.id);
+    const todo = await getAllTodosServices(req.user.id, "all");
     res.json(todo);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -81,8 +79,7 @@ export const deleteAllCompleted = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const user = req.user.id;
-    const todos = await getAllTodosServices(user, "all");
+    const todos = await getAllTodosServices(req.user.id, "all");
     const todo = await deleteAllTodosCompletedServices(todos);
     res.json(todo);
   } catch (error) {
