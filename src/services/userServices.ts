@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 import { verifyPassword, hashPassword } from "../utils/hashing";
 import { userRepository } from "../repository/userRepository";
 import { userObject } from "../lib/componets";
+import { CustomError } from "../utils/errorHandler";
 
 dotenv.config();
 
@@ -18,15 +19,10 @@ export const createUsersServices = async (userData: userObject) => {
 
 export const loginUsersServices = async (email: string, password: string) => {
   const user = await userRepository.findOne({ where: { email } });
-
   if (!user) {
-    throw new Error("Пользователь не найден");
+    throw new CustomError("User not found", 404);
   }
-  const isValid = verifyPassword(password, user.password);
-
-  if (!isValid) {
-    throw new Error("Неверный пароль");
-  }
+  verifyPassword(password, user.password);
   return user;
 };
 

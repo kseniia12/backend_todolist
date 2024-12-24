@@ -42,6 +42,7 @@ export const editTodoById = async (
       Number(req.params.id),
       req.body,
     );
+    console.log("todo", todo);
     res.json(todo);
   } catch (error) {
     res.status(400).json({ error: error.message });

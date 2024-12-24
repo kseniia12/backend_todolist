@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { formDataUser } from "../utils/checkDataUser";
 import { generateAccessToken } from "../utils/utilsToken";
 import {
@@ -12,6 +12,7 @@ import {
 export const createUser = async (
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const user = await createUsersServices(req.body);
@@ -19,26 +20,23 @@ export const createUser = async (
     const token = await generateAccessToken(checkUser);
     res.status(201).json({ user, token });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-export const loginUser = async (req: Request, res: Response): Promise<void> => {
+export const loginUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     const { email, password } = req.body;
     const user = await loginUsersServices(email, password);
-    if (!user) {
-      throw new Error("User not found");
-    }
     const checkUser = formDataUser(user);
     const token = await generateAccessToken(checkUser);
-    res.status(201).json({ user, token });
+    res.status(200).json({ user, token });
   } catch (error) {
-    let status = 500;
-    if ((error.message = "User not found")) {
-      status = 403;
-    }
-    res.status(status).json({ error: error.message });
+    next(error);
   }
 };
 
@@ -61,9 +59,9 @@ export const getUserById = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const user = req.user;
-    const checkUser = formDataUser(user);
-    res.json(checkUser);
+    const getUser = req.user;
+    const user = formDataUser(getUser);
+    res.json({ user });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
