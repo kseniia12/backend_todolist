@@ -22,7 +22,10 @@ export const loginUsersServices = async (email: string, password: string) => {
   if (!user) {
     throw new CustomError("User not found", 404);
   }
-  verifyPassword(password, user.password);
+  const passwordUser = verifyPassword(password, user.password);
+  if (!passwordUser) {
+    throw new CustomError("Invalid password", 401);
+  }
   return user;
 };
 

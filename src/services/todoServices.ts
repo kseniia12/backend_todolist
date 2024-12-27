@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 import { todoRepository } from "../repository/todoRepository";
 import { responseObjectTodo } from "../lib/componets";
 import { userRepository } from "../repository/userRepository";
+import { CustomError } from "../utils/errorHandler";
 
 dotenv.config();
 
@@ -10,6 +11,9 @@ export const createTodoServices = async (
   todo: responseObjectTodo,
 ) => {
   const user = await userRepository.findOne({ where: { id: userId } });
+  if (!user) {
+    throw new CustomError("Not fot found", 400);
+  }
   const newTodo = todoRepository.create({
     text: todo.text,
     user,
@@ -37,9 +41,8 @@ export const editTodoByIdServices = async (
 ) => {
   const todos = await todoRepository.find({ where: { user: { id: userId } } });
   const todo = todos.find((item) => item.id === todoId);
-  console.log(userData);
   if (!todo) {
-    throw new Error("Todo not found");
+    throw new CustomError("Todo not found", 404);
   }
   todo.text = userData.valueInputField;
   todo.completed = userData.completed;
@@ -53,18 +56,25 @@ export const deleteTodoByIdServices = async (
 ) => {
   const todos = await todoRepository.find({ where: { user: { id: userId } } });
   const todo = todos.find((item) => item.id === todoId);
+  if (!todo) {
+    throw new CustomError("Todo not found", 404);
+  }
   await todoRepository.delete(todo.id);
 };
 
-export const deleteAllTodoServices = async (userId: number) => {
-  const todos = await todoRepository.find({ where: { user: { id: userId } } });
-  const trueTodos = todos.filter((todo) => todo.completed === true);
-  todoRepository.remove(trueTodos);
+export const deleteAllCompletedTodosServices = async (userId: number) => {
+  const completedTodos = await todoRepository.find({
+    where: {
+      user: { id: userId },
+      completed: true,
+    },
+  });
+  if (completedTodos) {
+    return todoRepository.remove(completedTodos);
+  }
 };
 
-export const deleteAllTodosCompletedServices = async (
-  todos: responseObjectTodo[],
-) => {
+export const completeAllTodosServices = async (todos: responseObjectTodo[]) => {
   const allCompleted = todos.every((todo) => todo.completed);
   const allTasksNotCompleted = todos.map((todo) => ({
     ...todo,

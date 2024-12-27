@@ -43,6 +43,7 @@ export const loginUser = async (
 export const getAllUsers = async (
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
     if (req.user.id) {
@@ -50,44 +51,47 @@ export const getAllUsers = async (
       res.json(users);
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
 export const getUserById = async (
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const getUser = req.user;
     const user = formDataUser(getUser);
     res.json({ user });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
 export const editUserById = async (
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const user = await editUsersByIdServices(req.user.id, req.body);
     const checkUser = formDataUser(user);
     res.json(checkUser);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
 export const deleteUserById = async (
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
     await deleteUserByIdServices(req.user.id);
     res.status(204).send("Удален");
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
